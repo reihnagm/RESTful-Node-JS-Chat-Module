@@ -1,0 +1,35 @@
+{
+  "name": "RESTful-API-Node-JS-Chat-Module",
+  "version": "1.0.0",
+  "description": "Basic Chat API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "compression": "^1.7.4",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-fileupload": "^1.1.7-alpha.4",
+    "filesize": "^9.0.11",
+    "helmet": "^4.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.2",
+    "mysql": "^2.18.1",
+    "nodemailer": "^6.7.8",
+    "nodemon": "^2.0.4",
+    "otp-generator": "^4.0.0",
+    "path": "^0.12.7",
+    "sequelize": "^6.2.4",
+    "sharp": "^0.26.0",
+    "socket.io": "^2.4.1",
+    "uuid": "^8.2.0"
+  }
+}

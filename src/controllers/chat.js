@@ -1,0 +1,175 @@
+require("dotenv").config()
+
+const { v4: uuidv4 } = require('uuid')
+const moment = require('moment')
+const misc = require('../helpers/response')
+const Chat = require('../models/Chat')
+
+module.exports = {
+
+    getChats: async (req, res) => {
+      var userId = req.params.user_id
+      var result = []
+      try {
+        var chats = await Chat.getChats(userId)
+        for (const k in chats) {
+          var chat = chats[k]
+
+          var activitiesAssign = []
+          var activities = await Chat.getActivities(chat.uid)
+          for (const a in activities) {
+            var activity = activities[a]
+            activitiesAssign.push({
+              "chat_id": chat.uid,
+              "user_id": activity.user_id,
+              "name": activity.name,
+              "is_active": activity.is_active == 0 ? false : true
+            })
+          }
+          var currentUser = await Chat.getUsers(userId)
+          
+          var membersAssign = [
+            {
+              "user_id": currentUser.uid,
+              "name": currentUser.name,
+              "image": currentUser.image,
+              "token": currentUser.token,
+              "is_online": currentUser.is_online == 0 ? false : true,
+              "last_active": moment(currentUser.last_active).utc().format("YYYY-MM-DD HH:mm:ss") 
+            },
+            {
+              "user_id": chat.user_id,
+              "name": chat.name,
+              "image": chat.image,
+              "token": chat.token,
+              "is_online": chat.is_online == 0 ? false : true,
+              "last_active": moment(chat.last_active).utc().format("YYYY-MM-DD HH:mm:ss") 
+            },
+          ]
+   
+          var messagesAssign = []
+          var messages = await Chat.getMessages(chat.uid, currentUser.uid)
+          for (const me in messages) {
+            var message = messages[me]
+            messagesAssign.push({
+              "uid": message.uid,
+              "chat_id": chat.uid,
+              "content": message.content,
+              "sender_id": message.sender_id,
+              "sender_name": message.sender_name,
+              "receiver_id": message.receiver_id,
+              "is_read": message.is_read == 0 ? false : true,
+              "type": message.type,
+              "sent_time": moment(message.sent_time).utc().format("YYYY-MM-DD HH:mm:ss")
+            })
+          }
+
+          result.push({
+            "uid": chat.uid,
+            "current_user_id": userId,
+            "activity": activitiesAssign,
+            "members": membersAssign,
+            "messages": messagesAssign
+          })
+          
+        }
+
+        misc.response(res, 200, false, "", result)
+      } catch (e) {
+        console.log(e.messsage) // in-development
+        misc.response(res, 400, true, "Server error")
+      }
+    },
+
+    checkConversation: async(req, res) => {
+      var senderId = req.params.sender_id
+      var receiverId = req.params.receiver_id
+      var result = ""
+      try {
+        var checkConversation = await Chat.checkConversation(senderId, receiverId)
+        if(checkConversation.length == 0) {
+          result = "CONVERSATION_NOT_FOUND"
+        } else {
+          result = checkConversation[0].uid 
+        }
+        misc.response(res, 200, false, "", {
+          "uid": result
+        })
+      } catch(e) {
+        console.log(e.message) // in-development
+        misc.response(res, 400, true, "Server error")
+      }
+    },
+
+    initConversation: async(req, res) => {
+        // var activitiesId = uuidv4()
+        // var onScreenId = uuidv4()
+        var chatId = req.body.chat_id
+        var senderId = req.body.sender_id
+        var receiverId = req.body.receiver_id
+
+        try {
+            await Promise.race([    
+                Chat.insertChats(chatId, senderId, receiverId),
+                // Chat.insertActivities(activitiesId, chatId, senderId),
+                // Chat.insertActivities(activitiesId, chatId, receiverId),
+                // Chat.insertOnScreens(onScreenId, chatId, senderId, 0),
+                // Chat.insertOnScreens(onScreenId, chatId, receiverId, 0),
+            ])
+            misc.response(res, 200, false, "", [])
+        } catch(e) {
+            console.log(e.message) // in-development
+            misc.response(res, 400, true, "Server error")
+        }
+    },
+
+    sendMessage: async (req, res) => {  
+        var messageId = uuidv4()
+        var activitiesId = uuidv4()
+        // var onScreenId = uuidv4()
+        var chatId = req.body.chat_id
+        var senderId = req.body.sender_id
+        var receiverId = req.body.receiver_id
+        var content = req.body.content
+        var type = req.body.type
+
+        try {
+            await Promise.race([    
+                Chat.insertChats(chatId, senderId, receiverId),
+                // Chat.insertActivities(activitiesId, chatId, senderId),
+                // Chat.insertActivities(activitiesId, chatId, receiverId),
+                // Chat.insertOnScreens(onScreenId, chatId, senderId, 0),
+                // Chat.insertOnScreens(onScreenId, chatId, receiverId, 0),
+                Chat.insertMessages(messageId, chatId, senderId, receiverId, content, type)
+            ])
+            misc.response(res, 200, false, "", [])
+        } catch(e) {
+            console.log(e.message) // in-development
+            misc.response(res, 400, true, "Server error")
+        } 
+    },
+
+    viewMessage: async (req, res) => {
+        var chatId = req.body.chat_id
+        var userId = req.body.user_id
+        try {
+            await Chat.viewMessage(chatId, userId)
+            misc.response(res, 200, false, "", [])
+        } catch(e) {
+            console.log(e.message)
+            misc.response(res, 400, true, "Server Error")
+        }
+    },
+
+    userStateAvailableStatus: async (req, res) => {
+        var userId = req.params.user_id
+        var toggleStatus = req.params.toggle_status
+        try {
+            await Chat.userStateAvailableStatus(userId, toggleStatus)
+            misc.response(res, 200, false, "", [])
+        } catch(e) {
+            console.log(e.message) // in-development
+            misc.response(res, 400, true, "Server Error")
+        }
+    },
+}
