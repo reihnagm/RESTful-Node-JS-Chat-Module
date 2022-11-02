@@ -64,7 +64,6 @@ module.exports = {
       WHERE u.uid = '${userId}'`
       conn.query(query, (e, result) => {
         if(e) {
-          console.log(e)
           reject(new Error(e))
         } else {
           resolve(result[0])
@@ -91,7 +90,6 @@ module.exports = {
       GROUP BY m.uid 
       ORDER BY m.sent_time DESC`
       conn.query(query, (e, result) => {
-        console.log(e)
         if(e) {
           reject(new Error(e))
         } else {

@@ -102,8 +102,8 @@ module.exports = {
     },
 
     initConversation: async(req, res) => {
-        // var activitiesId = uuidv4()
-        // var onScreenId = uuidv4()
+        var activitiesId = uuidv4()
+        var onScreenId = uuidv4()
         var chatId = req.body.chat_id
         var senderId = req.body.sender_id
         var receiverId = req.body.receiver_id
@@ -111,10 +111,10 @@ module.exports = {
         try {
             await Promise.race([    
                 Chat.insertChats(chatId, senderId, receiverId),
-                // Chat.insertActivities(activitiesId, chatId, senderId),
-                // Chat.insertActivities(activitiesId, chatId, receiverId),
-                // Chat.insertOnScreens(onScreenId, chatId, senderId, 0),
-                // Chat.insertOnScreens(onScreenId, chatId, receiverId, 0),
+                Chat.insertActivities(activitiesId, chatId, senderId),
+                Chat.insertActivities(activitiesId, chatId, receiverId),
+                Chat.insertOnScreens(onScreenId, chatId, senderId, 0),
+                Chat.insertOnScreens(onScreenId, chatId, receiverId, 0),
             ])
             misc.response(res, 200, false, "", [])
         } catch(e) {
@@ -126,7 +126,7 @@ module.exports = {
     sendMessage: async (req, res) => {  
         var messageId = uuidv4()
         var activitiesId = uuidv4()
-        // var onScreenId = uuidv4()
+        var onScreenId = uuidv4()
         var chatId = req.body.chat_id
         var senderId = req.body.sender_id
         var receiverId = req.body.receiver_id
@@ -136,10 +136,10 @@ module.exports = {
         try {
             await Promise.race([    
                 Chat.insertChats(chatId, senderId, receiverId),
-                // Chat.insertActivities(activitiesId, chatId, senderId),
-                // Chat.insertActivities(activitiesId, chatId, receiverId),
-                // Chat.insertOnScreens(onScreenId, chatId, senderId, 0),
-                // Chat.insertOnScreens(onScreenId, chatId, receiverId, 0),
+                Chat.insertActivities(activitiesId, chatId, senderId),
+                Chat.insertActivities(activitiesId, chatId, receiverId),
+                Chat.insertOnScreens(onScreenId, chatId, senderId, 0),
+                Chat.insertOnScreens(onScreenId, chatId, receiverId, 0),
                 Chat.insertMessages(messageId, chatId, senderId, receiverId, content, type)
             ])
             misc.response(res, 200, false, "", [])
@@ -156,7 +156,7 @@ module.exports = {
             await Chat.viewMessage(chatId, userId)
             misc.response(res, 200, false, "", [])
         } catch(e) {
-            console.log(e.message)
+            console.log(e.message) // in-development
             misc.response(res, 400, true, "Server Error")
         }
     },
