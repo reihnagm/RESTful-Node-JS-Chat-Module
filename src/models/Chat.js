@@ -2,6 +2,23 @@ const conn = require('../configs/db')
 
 module.exports = {
 
+  checkOnScreeen: (chatId, receiverId) => {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT os.on_screen, ut.token 
+      FROM on_screens os
+      LEFT join user_tokens ut ON ut.user_id = '${receiverId}'
+      WHERE os.user_id = '${receiverId}'
+      AND os.chat_id = '${chatId}'`
+      conn.query(query, (e, result) => {
+        if(e) {
+          reject(new Error(e))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
   checkConversation: (senderId, receiverId) => {
     return new Promise((resolve, reject) => {
       const query = `SELECT uid FROM chats 
@@ -31,6 +48,21 @@ module.exports = {
             THEN c.sender_id = u.uid
         END
       GROUP BY c.uid` 
+      conn.query(query, (e, result) => {
+        if(e) {
+          reject(new Error(e))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+  getOnScreens: (chatId) => {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT u.uid, u.name, os.on_screen FROM on_screens os
+        INNER JOIN users u ON os.user_id = u.uid
+        WHERE os.chat_id = '${chatId}'`
       conn.query(query, (e, result) => {
         if(e) {
           reject(new Error(e))
@@ -155,10 +187,10 @@ module.exports = {
     })
   },
 
-  viewMessage: (chatId, currentUserId) => {
+  viewMessage: (chatId, userId, isRead) => {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE messages SET is_read = 1 
-      WHERE receiver_id = '${currentUserId}' 
+      const query = `UPDATE messages SET is_read = '${isRead}'
+      WHERE receiver_id = '${userId}' 
       AND chat_id = '${chatId}'`
       conn.query(query, (e, result) => {
         if(e) {
@@ -184,9 +216,37 @@ module.exports = {
     })
   },
 
+  userStateTyping: (userId, chatId, isActive) => {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE chat_activities SET is_active = '${isActive}' 
+      WHERE user_id = '${userId}' AND chat_id = '${chatId}'`
+      conn.query(query, (e, result) => {
+        if(e) {
+          reject(new Error(e))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
   userStateAvailableStatus: (userId, toggleStatus) => {
     return new Promise((resolve, reject) => {
       const query = `UPDATE users SET is_online = '${toggleStatus}' WHERE uid = '${userId}'`
+      conn.query(query, (e, result) => {
+        if(e) {
+          reject(new Error(e))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+  userStateScreen: (userId, chatId, onScreen) => {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE on_screens SET on_screen = '${onScreen}' 
+      WHERE user_id = '${userId}' AND chat_id = '${chatId}'`
       conn.query(query, (e, result) => {
         if(e) {
           reject(new Error(e))

@@ -17,7 +17,22 @@ module.exports = {
             misc.response(res, 200, false, "", [])
         } catch(e) {
             console.log(e.meessage)
-            misc.response(res, 400, true, "Server Error")
+            misc.response(res, 400, true, "Server error")
+        }
+    },
+
+    getUserFcm: async (req, res) => {
+        var userId = req.params.user_id
+        var result = ""
+        try {
+            var getUsers = await Firebase.getUserFcm(userId)
+            if(getUsers.length != 0) {
+                result = getUsers[0].token
+            } 
+            misc.response(res, 200, false, "", result)
+        } catch(e) {
+            console.log(e.message)
+            misc.response(res, 400, true, "Server error")
         }
     },
 
@@ -35,7 +50,7 @@ module.exports = {
             misc.response(res, 200, false, "", result)
         } catch(e) {   
             console.log(e.message)
-            misc.response(res, 400, true, "Server Error")
+            misc.response(res, 400, true, "Server error")
         }
     }
 
