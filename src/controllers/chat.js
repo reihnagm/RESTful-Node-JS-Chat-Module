@@ -56,6 +56,7 @@ module.exports = {
                         "uid": message.uid,
                         "chat_id": chat.uid,
                         "content": message.content,
+                        "image": message.image,
                         "sender_id": message.sender_id,
                         "sender_name": message.sender_name,
                         "receiver_id": message.receiver_id,
@@ -144,6 +145,7 @@ module.exports = {
                         "uid": message.uid,
                         "chat_id": chat.uid,
                         "content": message.content,
+                        "image": message.image,
                         "product_id": message.product_id,
                         "product_name": message.product_name,
                         "product_image": message.product_image,
@@ -257,6 +259,7 @@ module.exports = {
         var receiverId = req.body.receiver_id
         var content = req.body.content
         var type = req.body.type
+        var image = req.body.image != null ? req.body.image : "-"
         
         var productId = req.body.product_id != null ? req.body.product_id : "-"
         var productName = req.body.product_name != null ? req.body.product_name : "-"
@@ -264,7 +267,7 @@ module.exports = {
         var productPrice =  req.body.product_price != null ? req.body.product_price : "-"
 
         try {
-            await Chat.insertMessages(messageId, chatId, senderId, receiverId, content, type, productId, productName, productImage, productPrice)
+            await Chat.insertMessages(messageId, chatId, senderId, receiverId, content, image, type, productId, productName, productImage, productPrice)
             misc.response(res, 200, false, "", [])
         } catch(e) {
             console.log(e.message) // in-development

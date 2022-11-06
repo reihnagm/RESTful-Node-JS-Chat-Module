@@ -3,7 +3,7 @@ const auth = require("./routes/auth")
 const chat = require("./routes/chat")
 const firebase = require("./routes/firebase")
 const product = require("./routes/product")
-const product = require("./routes/media")
+const media = require("./routes/media")
 const Route = express.Router()
 
 Route

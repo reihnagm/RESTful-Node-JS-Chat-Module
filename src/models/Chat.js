@@ -136,7 +136,7 @@ module.exports = {
       m.product_id, m.product_name, m.product_image,
       m.product_price,
       m.sender_id, m.receiver_id,
-      m.sent_time, m.content, m.is_read, 
+      m.sent_time, m.content, m.image, m.is_read, 
       emt.name type
       FROM messages m 
       INNER JOIN users u ON m.sender_id = u.uid
@@ -185,12 +185,12 @@ module.exports = {
     })
   },
 
-  insertMessages: (uid, chatId, senderId, receiverId, content, type, productId, productName, productImage, productPrice) => {
+  insertMessages: (uid, chatId, senderId, receiverId, content, image, type, productId, productName, productImage, productPrice) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO messages (uid, chat_id, sender_id, receiver_id, content, is_read, type, 
+      const query = `INSERT INTO messages (uid, chat_id, sender_id, receiver_id, content, image, is_read, type, 
         product_id, product_name, product_image, product_price
       )
-      VALUES ('${uid}', '${chatId}', '${senderId}', '${receiverId}', '${content}', '0', '${type}',
+      VALUES ('${uid}', '${chatId}', '${senderId}', '${receiverId}', '${content}', '${image}', '0', '${type}',
         '${productId}', '${productName}', '${productImage}', '${productPrice}'
       )`
       conn.query(query, (e, result) => {
