@@ -58,6 +58,30 @@ module.exports = {
     })
   },
 
+  getChat: (chatId, userId) => {
+    return new Promise ((resolve, reject) => {
+      const query = `
+      SELECT c.uid, u.uid AS user_id, u.name, u.image, ut.token, u.is_online, u.last_active
+      FROM chats c, users u
+      JOIN user_tokens ut ON u.uid = ut.user_id
+      WHERE  
+        CASE 
+            WHEN c.sender_id = '${userId}'
+            THEN c.receiver_id = u.uid
+            WHEN c.receiver_id = '${userId}'
+            THEN c.sender_id = u.uid
+        END
+      AND c.uid = '${chatId}'` 
+      conn.query(query, (e, result) => {
+        if(e) {
+          reject(new Error(e))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
   getOnScreens: (chatId) => {
     return new Promise((resolve, reject) => {
       const query = `SELECT u.uid, u.name, os.on_screen FROM on_screens os
@@ -109,6 +133,8 @@ module.exports = {
       const query = `SELECT 
       DISTINCT m.uid,
       u.name AS sender_name,
+      m.product_id, m.product_name, m.product_image,
+      m.product_price,
       m.sender_id, m.receiver_id,
       m.sent_time, m.content, m.is_read, 
       emt.name type
@@ -159,10 +185,14 @@ module.exports = {
     })
   },
 
-  insertMessages: (uid, chatId, senderId, receiverId, content, type) => {
+  insertMessages: (uid, chatId, senderId, receiverId, content, type, productId, productName, productImage, productPrice) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO messages (uid, chat_id, sender_id, receiver_id, content, is_read, type)
-      VALUES ('${uid}', '${chatId}', '${senderId}', '${receiverId}', '${content}', '0', '${type}')`
+      const query = `INSERT INTO messages (uid, chat_id, sender_id, receiver_id, content, is_read, type, 
+        product_id, product_name, product_image, product_price
+      )
+      VALUES ('${uid}', '${chatId}', '${senderId}', '${receiverId}', '${content}', '0', '${type}',
+        '${productId}', '${productName}', '${productImage}', '${productPrice}'
+      )`
       conn.query(query, (e, result) => {
         if(e) {
           reject(new Error(e))
@@ -177,6 +207,20 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO on_screens (uid, chat_id, user_id, on_screen) 
       VALUES ('${uid}', '${chatId}', '${userId}', '${on}')`
+      conn.query(query, (e, result) => {
+        if(e) {
+          reject(new Error(e))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+  insertProductAttachs: (uid, productName, productImage, productPrice, messageId) => {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO product_attachs (uid, product_name, product_image, product_price) 
+      VALUES('${uid}', '${productName}', '${productImage}', '${productPrice}', '${messageId}')`
       conn.query(query, (e, result) => {
         if(e) {
           reject(new Error(e))
