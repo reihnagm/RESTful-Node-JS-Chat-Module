@@ -42,7 +42,7 @@ module.exports = {
         var productId = req.params.product_id
         var result = []
         try {
-            var products = await Product.getProduct()
+            var products = await Product.getProduct(productId)
             for (const i in products) {
                 var product = products[i]
                 var user = await Chat.getUsers(product.user_id)
