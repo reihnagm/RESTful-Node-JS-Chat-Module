@@ -26,6 +26,7 @@ module.exports = {
       OR receiver_id = '${senderId}' AND sender_id = '${receiverId}'`
       conn.query(query, (e, result) => {
         if(e) {
+          console.log(e)
           reject(new Error(e))
         } else {
           resolve(result)
@@ -46,8 +47,7 @@ module.exports = {
             THEN c.receiver_id = u.uid
             WHEN c.receiver_id = '${userId}'
             THEN c.sender_id = u.uid
-        END
-      GROUP BY c.uid` 
+        END` 
       conn.query(query, (e, result) => {
         if(e) {
           reject(new Error(e))
@@ -59,9 +59,10 @@ module.exports = {
   },
 
   getChat: (chatId, userId) => {
+    console.log(chatId)
+    console.log(userId)
     return new Promise ((resolve, reject) => {
-      const query = `
-      SELECT c.uid, u.uid AS user_id, u.name, u.image, ut.token, u.is_online, u.last_active
+      const query = `SELECT c.uid, u.uid AS user_id, u.name, u.image, ut.token, u.is_online, u.last_active
       FROM chats c, users u
       JOIN user_tokens ut ON u.uid = ut.user_id
       WHERE  
@@ -73,6 +74,7 @@ module.exports = {
         END
       AND c.uid = '${chatId}'` 
       conn.query(query, (e, result) => {
+        console.log(e)
         if(e) {
           reject(new Error(e))
         } else {
@@ -145,9 +147,9 @@ module.exports = {
       WHERE c.uid = '${chatId}' 
       AND (m.sender_id = '${userId}' 
       OR m.receiver_id = '${userId}')
-      GROUP BY m.uid 
       ORDER BY m.sent_time DESC`
       conn.query(query, (e, result) => {
+        console.log(e)
         if(e) {
           reject(new Error(e))
         } else {
