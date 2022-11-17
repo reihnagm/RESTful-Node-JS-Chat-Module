@@ -237,7 +237,8 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const query = `UPDATE messages SET is_read = '${isRead}'
       WHERE receiver_id = '${userId}' 
-      AND chat_id = '${chatId}'`
+      AND chat_id = '${chatId}' 
+      AND is_read = 0`
       conn.query(query, (e, result) => {
         if(e) {
           reject(new Error(e))
