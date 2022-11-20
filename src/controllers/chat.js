@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid')
 const moment = require('moment')
 const misc = require('../helpers/response')
 const Chat = require('../models/Chat')
-const { on } = require("../configs/db")
+const { on, off } = require("../configs/db")
 
 module.exports = {
 
@@ -57,6 +57,10 @@ module.exports = {
                         "chat_id": chat.uid,
                         "content": message.content,
                         "image": message.image,
+                        "product_id": message.product_id,
+                        "product_name": message.product_name,
+                        "product_image": message.product_image,
+                        "product_price": message.product_price,
                         "sender_id": message.sender_id,
                         "sender_name": message.sender_name,
                         "receiver_id": message.receiver_id,
@@ -252,8 +256,8 @@ module.exports = {
     },
 
     sendMessage: async (req, res) => {  
-        var messageId = uuidv4()
-       
+        var messageId = req.body.message_id
+
         var chatId = req.body.chat_id
         var senderId = req.body.sender_id
         var receiverId = req.body.receiver_id
@@ -262,17 +266,46 @@ module.exports = {
         var image = req.body.image != null ? req.body.image : "-"
         
         var productId = req.body.product_id != null ? req.body.product_id : "-"
-        var productName = req.body.product_name != null ? req.body.product_name : "-"
-        var productImage = req.body.product_image != null ? req.body.product_image : "-"
-        var productPrice =  req.body.product_price != null ? req.body.product_price : "-"
 
         try {
-            await Chat.insertMessages(messageId, chatId, senderId, receiverId, content, image, type, productId, productName, productImage, productPrice)
+            await Chat.insertMessages(messageId, chatId, senderId, receiverId, content, image, type, productId)
             misc.response(res, 200, false, "", [])
         } catch(e) {
             console.log(e.message) // in-development
             misc.response(res, 400, true, "Server error")
         } 
+    },
+
+    deleteMessage: async (req, res) => {
+        var uid = uuidv4()
+        var messageId = req.params.message_id
+        var userId = req.params.user_id
+        var softDelete = req.params.soft_delete
+        if(softDelete) {
+            try {
+                var checkIfExistDelete = await Chat.checkSoftDeleteMessage(messageId)
+                if(checkIfExistDelete.isExist == 1) {
+                    await Promise.all([
+                        Chat.truncateSoftDeleteMessage(messageId),
+                        Chat.deleteMessage(messageId)
+                    ])
+                } else {
+                    await Chat.softDeleteMessage(uid, messageId, userId)   
+                }
+                misc.response(res, 200, false, "", [])
+            } catch(e) {
+                console.log(e.message) // in-development
+                misc.response(res, 400, true, "Server error")
+            }
+        } else {
+            try {
+                await Chat.deleteMessage(messageId)
+                misc.response(res, 200, false, "", [])
+            } catch(e) {
+                console.log(e.message) // in-development
+                misc.response(res, 400, true, "Server error")
+            }
+        }
     },
 
     viewMessage: async (req, res) => {

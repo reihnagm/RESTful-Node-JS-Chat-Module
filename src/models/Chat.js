@@ -2,6 +2,20 @@ const conn = require('../configs/db')
 
 module.exports = {
 
+  initFcm: (uid, userId, token)=> {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO user_tokens (uid, user_id, token) VALUES('${uid}', '${userId}', '${token}')
+      ON DUPLICATE KEY UPDATE token = '${token}'`
+      conn.query(query, (e, result) => {
+        if(e) {
+          reject(new Error(e))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
   checkOnScreeen: (chatId, receiverId) => {
     return new Promise((resolve, reject) => {
       const query = `SELECT os.on_screen, ut.token 
@@ -26,7 +40,6 @@ module.exports = {
       OR receiver_id = '${senderId}' AND sender_id = '${receiverId}'`
       conn.query(query, (e, result) => {
         if(e) {
-          console.log(e)
           reject(new Error(e))
         } else {
           resolve(result)
@@ -59,8 +72,6 @@ module.exports = {
   },
 
   getChat: (chatId, userId) => {
-    console.log(chatId)
-    console.log(userId)
     return new Promise ((resolve, reject) => {
       const query = `SELECT c.uid, u.uid AS user_id, u.name, u.image, ut.token, u.is_online, u.last_active
       FROM chats c, users u
@@ -74,7 +85,6 @@ module.exports = {
         END
       AND c.uid = '${chatId}'` 
       conn.query(query, (e, result) => {
-        console.log(e)
         if(e) {
           reject(new Error(e))
         } else {
@@ -135,21 +145,79 @@ module.exports = {
       const query = `SELECT 
       DISTINCT m.uid,
       u.name AS sender_name,
-      m.product_id, m.product_name, m.product_image,
-      m.product_price,
+      p.uid AS product_id, p.name AS product_name, p.image AS product_image,
+      p.price AS product_price,
       m.sender_id, m.receiver_id,
       m.sent_time, m.content, m.image, m.is_read, 
       emt.name type
       FROM messages m 
+      LEFT JOIN products p ON m.product_id = p.uid
+      LEFT JOIN soft_delete_messages sdm ON sdm.message_id = m.uid
       INNER JOIN users u ON m.sender_id = u.uid
       INNER JOIN chats c ON c.uid = m.chat_id
       INNER JOIN enum_message_types emt ON emt.uid = m.type
       WHERE c.uid = '${chatId}' 
       AND (m.sender_id = '${userId}' 
       OR m.receiver_id = '${userId}')
+      AND (sdm.message_id IS NULL OR sdm.user_id != '${userId}')
       ORDER BY m.sent_time DESC`
       conn.query(query, (e, result) => {
-        console.log(e)
+        if(e) {
+          reject(new Error(e))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+  checkSoftDeleteMessage: (messageId, userId) => {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT IF(EXISTS(
+      SELECT *
+      FROM soft_delete_messages
+      WHERE message_id = '${messageId}'), 1, 0) AS isExist`
+      conn.query(query, (e, result) => {
+        if(e) {
+          reject(new Error(e))
+        } else {
+          resolve(result[0])
+        }
+      })
+    })
+  },
+
+  truncateSoftDeleteMessage: (messageId) => {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM soft_delete_messages WHERE message_id = '${messageId}'`
+      conn.query(query, (e, result) => {
+        if(e) {
+          reject(new Error(e))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+  softDeleteMessage: (uid, messageId, userId) => {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO soft_delete_messages (uid, message_id, user_id) VALUES 
+      ('${uid}', '${messageId}', '${userId}')`
+      conn.query(query, (e, result) => {
+        if(e) {
+          reject(new Error(e))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+  deleteMessage: (messageId) => {
+    return new Promise ((resolve, reject) => {
+      const query = `DELETE FROM messages WHERE uid = '${messageId}'`
+      conn.query(query, (e, result) => {
         if(e) {
           reject(new Error(e))
         } else {
@@ -187,13 +255,13 @@ module.exports = {
     })
   },
 
-  insertMessages: (uid, chatId, senderId, receiverId, content, image, type, productId, productName, productImage, productPrice) => {
+  insertMessages: (uid, chatId, senderId, receiverId, content, image, type, productId) => {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO messages (uid, chat_id, sender_id, receiver_id, content, image, is_read, type, 
-        product_id, product_name, product_image, product_price
+        product_id
       )
       VALUES ('${uid}', '${chatId}', '${senderId}', '${receiverId}', '${content}', '${image}', '0', '${type}',
-        '${productId}', '${productName}', '${productImage}', '${productPrice}'
+        '${productId}'
       )`
       conn.query(query, (e, result) => {
         if(e) {
@@ -239,20 +307,6 @@ module.exports = {
       WHERE receiver_id = '${userId}' 
       AND chat_id = '${chatId}' 
       AND is_read = 0`
-      conn.query(query, (e, result) => {
-        if(e) {
-          reject(new Error(e))
-        } else {
-          resolve(result)
-        }
-      })
-    })
-  },
-
-  initFcm: (uid, userId, token)=> {
-    return new Promise((resolve, reject) => {
-      const query = `INSERT INTO user_tokens (uid, user_id, token) VALUES('${uid}', '${userId}', '${token}')
-      ON DUPLICATE KEY UPDATE token = '${token}'`
       conn.query(query, (e, result) => {
         if(e) {
           reject(new Error(e))

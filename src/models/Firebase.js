@@ -29,7 +29,7 @@ module.exports = {
     })
   },
 
-  allUserFcm: (userId) => {
+  allUserExceptCurrentUserFcm: (userId) => {
     return new Promise((resolve, reject) => {
       const query = `SELECT token FROM user_tokens WHERE user_id != '${userId}'`
         conn.query(query, (e, result) => {

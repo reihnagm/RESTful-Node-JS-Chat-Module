@@ -11,6 +11,7 @@ Route
 	.get("/user-state-typing/:chat_id/:user_id/:is_active", chat.userStateTyping)
 	.get("/user-state-available-status/:user_id/:toggle_status", chat.userStateAvailableStatus)
 	.get("/user-state-screen/:chat_id/:user_id/:on_screen", chat.userStateScreen)
+	.delete("/delete-message/:message_id/:user_id/:soft_delete", chat.deleteMessage)
 	.post("/view", chat.viewMessage)
 	.post("/", chat.sendMessage)
 

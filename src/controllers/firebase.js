@@ -36,15 +36,15 @@ module.exports = {
         }
     },
 
-    allUserFcm: async (req, res) => {
+    allUserExceptCurrentUserFcm: async (req, res) => {
         var userId = req.params.user_id
         var result = []
         try {
-            var allUserFcm = await Firebase.allUserFcm(userId)
-            if(allUserFcm.length != 0) {
-                for (const a in allUserFcm) {
-                    var fcm = allUserFcm[a].token
-                    result.push(fcm)
+            var allUserExceptCurrentUserFcm = await Firebase.allUserExceptCurrentUserFcm(userId)
+            if(allUserExceptCurrentUserFcm.length != 0) {
+                for (const k in allUserExceptCurrentUserFcm) {
+                    var token = allUserExceptCurrentUserFcm[k].token
+                    result.push(token)
                 }   
             } 
             misc.response(res, 200, false, "", result)
