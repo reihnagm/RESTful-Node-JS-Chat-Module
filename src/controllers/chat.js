@@ -66,7 +66,7 @@ module.exports = {
                         "receiver_id": message.receiver_id,
                         "is_read": message.is_read == 0 ? false : true,
                         "type": message.type,
-                        "sent_time": moment(message.sent_time).utc().format("YYYY-MM-DD HH:mm:ss")
+                        "sent_time": moment(message.sent_time).format("YYYY-MM-DD HH:mm:ss")
                     })
                 }
 
@@ -159,7 +159,7 @@ module.exports = {
                         "receiver_id": message.receiver_id,
                         "is_read": message.is_read == 0 ? false : true,
                         "type": message.type,
-                        "sent_time": moment(message.sent_time).utc().format("YYYY-MM-DD HH:mm:ss")
+                        "sent_time": moment(message.sent_time).format("YYYY-MM-DD HH:mm:ss")
                     })
                 }
 
