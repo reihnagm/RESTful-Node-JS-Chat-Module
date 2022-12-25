@@ -4,13 +4,13 @@ const { v4: uuidv4 } = require('uuid')
 const moment = require('moment')
 const misc = require('../helpers/response')
 const Chat = require('../models/Chat')
-const { on, off } = require("../configs/db")
 
 module.exports = {
 
     getChats: async (req, res) => {
         var userId = req.params.user_id
-        var result = []
+        var results = []
+
         try {
             var chats = await Chat.getChats(userId)
             for (const k in chats) {
@@ -82,7 +82,7 @@ module.exports = {
                     })
                 }
 
-                result.push({
+                results.push({
                     "uid": chat.uid,
                     "current_user_id": userId,
                     "activity": activitiesAssign,
@@ -90,10 +90,9 @@ module.exports = {
                     "members": membersAssign,
                     "messages": messagesAssign
                 })
-            
             }
 
-            misc.response(res, 200, false, "", result)
+            misc.response(res, 200, false, "", results)
         } catch (e) {
             console.log(e.messsage) // in-development
             misc.response(res, 400, true, "Server error")
@@ -103,7 +102,8 @@ module.exports = {
     getChat: async (req, res) => {
         var chatId = req.params.chat_id
         var userId = req.params.user_id
-        var result = []
+        var results = []
+
         try {
             var chats = await Chat.getChat(chatId, userId)
             for (const k in chats) {
@@ -175,7 +175,7 @@ module.exports = {
                     })
                 }
 
-                result.push({
+                results.push({
                     "uid": chat.uid,
                     "current_user_id": userId,
                     "activity": activitiesAssign,
@@ -186,7 +186,7 @@ module.exports = {
             
             }
 
-            misc.response(res, 200, false, "", result)
+            misc.response(res, 200, false, "", results)
         } catch (e) {
             console.log(e.messsage) // in-development
             misc.response(res, 400, true, "Server error")
@@ -197,6 +197,7 @@ module.exports = {
         var chatId = req.params.chat_id
         var receiverId = req.params.receiver_id
         var result = ""
+
         try {
             var checkOnScreen = await Chat.checkOnScreeen(chatId, receiverId)
             if(checkOnScreen.length == 0) {
@@ -217,6 +218,7 @@ module.exports = {
       var senderId = req.params.sender_id
       var receiverId = req.params.receiver_id
       var result = ""
+
       try {
         var checkConversation = await Chat.checkConversation(senderId, receiverId)
         if(checkConversation.length == 0) {
@@ -248,7 +250,7 @@ module.exports = {
                 Chat.insertOnScreens(onScreenId, chatId, senderId, 0),
                 Chat.insertOnScreens(onScreenId, chatId, receiverId, 0),
             ])
-            misc.response(res, 200, false, "", [])
+            misc.response(res, 200, false, "")
         } catch(e) {
             console.log(e.message) // in-development
             misc.response(res, 400, true, "Server error")
@@ -269,7 +271,7 @@ module.exports = {
 
         try {
             await Chat.insertMessages(messageId, chatId, senderId, receiverId, content, image, type, productId)
-            misc.response(res, 200, false, "", [])
+            misc.response(res, 200, false, "")
         } catch(e) {
             console.log(e.message) // in-development
             misc.response(res, 400, true, "Server error")
@@ -281,6 +283,7 @@ module.exports = {
         var messageId = req.params.message_id
         var userId = req.params.user_id
         var softDelete = req.params.soft_delete
+
         if(softDelete) {
             try {
                 var checkIfExistDelete = await Chat.checkSoftDeleteMessage(messageId)
@@ -300,7 +303,7 @@ module.exports = {
         } else {
             try {
                 await Chat.deleteMessage(messageId)
-                misc.response(res, 200, false, "", [])
+                misc.response(res, 200, false, "")
             } catch(e) {
                 console.log(e.message) // in-development
                 misc.response(res, 400, true, "Server error")
@@ -312,9 +315,10 @@ module.exports = {
         var chatId = req.body.chat_id
         var userId = req.body.user_id
         var isRead = req.body.is_read
+
         try {
             await Chat.viewMessage(chatId, userId, isRead)
-            misc.response(res, 200, false, "", [])
+            misc.response(res, 200, false, "")
         } catch(e) {
             console.log(e.message) // in-development
             misc.response(res, 400, true, "Server error")
@@ -325,10 +329,11 @@ module.exports = {
         var userId = req.params.user_id
         var chatId = req.params.chat_id
         var isActive = req.params.is_active
+
         try {
             await Chat.userStateTyping(userId, chatId, isActive)
         } catch(e) {
-            console.log(e.message)
+            console.log(e.message) // in-development
             misc.response(res, 400, true, "Server error")
         }
     },
@@ -336,9 +341,10 @@ module.exports = {
     userStateAvailableStatus: async (req, res) => {
         var userId = req.params.user_id
         var toggleStatus = req.params.toggle_status
+
         try {
             await Chat.userStateAvailableStatus(userId, toggleStatus)
-            misc.response(res, 200, false, "", [])
+            misc.response(res, 200, false, "")
         } catch(e) {
             console.log(e.message) // in-development
             misc.response(res, 400, true, "Server error")
@@ -349,9 +355,10 @@ module.exports = {
         var userId = req.params.user_id
         var chatId = req.params.chat_id
         var onScreen = req.params.on_screen
+        
         try {
             await Chat.userStateScreen(userId, chatId, onScreen)
-            misc.response(res, 200, false, "", [])
+            misc.response(res, 200, false, "")
         } catch(e) {
             console.log(e.message) // in-development
             misc.response(res, 400, true, "Server error")

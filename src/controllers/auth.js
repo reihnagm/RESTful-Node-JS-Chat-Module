@@ -7,6 +7,7 @@ module.exports = {
     login: async (req, res) => {
         var email = req.body.email
         var password = req.body.password
+        
         try {
             var users = await Auth.login(email, password)
             if(users.length != 0) {

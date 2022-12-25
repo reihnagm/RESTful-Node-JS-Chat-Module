@@ -7,10 +7,11 @@ const misc = require('../helpers/response')
 module.exports = {
 
   postMedia: async(req, res) => {
+    const { folder } = req.body 
+
     try {
-      const { folder } = req.body 
       if(typeof folder == "undefined") {
-        throw new Error("Field folder is Required")
+        throw new Error("folder is required")
       }
       if(req.files != null) {
         await fs.promises.mkdir(`${process.cwd()}/public/images/${folder}`, { recursive: true })
@@ -26,7 +27,7 @@ module.exports = {
           "mimetype": mimeType
         })
       } else {
-        throw new Error("Field media is Required")
+        throw new Error("media is required")
       }
     } catch(e) {
       console.log(e.message) // in-development

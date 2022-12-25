@@ -6,8 +6,9 @@ const Chat = require("../models/Chat")
 
 module.exports = {
 
-    getProducts: async (req, res) => {
-        var result = []
+    getProducts: async (_, res) => {
+        var results = []
+
         try {
             var products = await Product.getProducts()
             for (const i in products) {
@@ -31,7 +32,7 @@ module.exports = {
                     }
                 })
             }
-            misc.response(res, 200, false, "", result)
+            misc.response(res, 200, false, "", results)
         } catch (e) {
             console.log(e.messsage) // in-development
             misc.response(res, 400, true, "Server error")
@@ -40,13 +41,14 @@ module.exports = {
 
     getProduct: async (req, res) => {
         var productId = req.params.product_id
-        var result = []
+        var results = []
+
         try {
             var products = await Product.getProduct(productId)
             for (const i in products) {
                 var product = products[i]
                 var user = await Chat.getUsers(product.user_id)
-                result.push({
+                results.push({
                     "product_id": product.uid,
                     "product_name": product.name,
                     "product_image": product.image,
@@ -64,7 +66,8 @@ module.exports = {
                     }
                 })
             }
-            misc.response(res, 200, false, "", result)
+            
+            misc.response(res, 200, false, "", results)
         } catch (e) {
             console.log(e.messsage) // in-development
             misc.response(res, 400, true, "Server error")

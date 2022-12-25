@@ -1,8 +1,8 @@
 {
-  "name": "RESTful-API-Node-JS-Chat-Module",
+  "name": "-",
   "version": "1.0.0",
-  "description": "Basic Chat API",
-  "main": "index.js",
+  "description": "-",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon app"
